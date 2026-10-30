@@ -32,5 +32,13 @@ export function createApp(config: RigConfig = loadConfig()) {
     );
   });
 
+  // Same reader, same sort as the page (ADR 0001): the JSON and /digest/:night can never
+  // disagree because both read a night through readNight and nothing reshapes it after.
+  app.get('/api/digest/:night', (c) => {
+    const night = readNight(config.runsDir, c.req.param('night'));
+    if (night === null) return c.notFound();
+    return c.json(night);
+  });
+
   return app;
 }
