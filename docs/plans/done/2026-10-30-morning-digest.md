@@ -1,8 +1,9 @@
 ---
 plan: morning-digest
-status: ready
+status: done
 owner: rook
 opened: 2026-10-29
+closed: 2026-10-30
 ---
 
 # Morning digest
@@ -77,3 +78,25 @@ page again with `LANE_MARKER` unset (the banner reads "no marker set") and uploa
 link. Move this plan to `docs/plans/done/` with its issue list.
 
 Done when: the preview link no longer shows the lane marker.
+
+## Issues
+
+| # | Issue | Blocked by | Worker | Closed |
+|---|-------|-----------|--------|--------|
+| 1 | Digest row type and readNight signature | — | claude-code · opus-5 · high | 2026-10-30 |
+| 2 | Run log reader: parse a night into rows | #1 | claude-code · opus-5 · high | 2026-10-30 |
+| 3 | Digest page: GET /digest/:night | #1 | claude-code · sonnet-5 · medium | 2026-10-30 |
+| 4 | Digest JSON: GET /api/digest/:night | #1 | claude-code · sonnet-5 · medium | 2026-10-30 |
+| 5 | Board links each night to its digest | #1 | claude-code · sonnet-5 · medium | 2026-10-30 |
+| 6 | Route tests for the digest page and JSON | #1 | claude-code · sonnet-5 · medium | 2026-10-30 |
+| 7 | Preview for review | #3, #5 | claude-code · opus-5 · high | 2026-10-30 |
+| 8 | Clean up: take the marker off and file the plan | #7 | claude-code · opus-5 · high | — |
+
+Section 1 became two issues: the type file landed on its own first, so the four parts of
+section 2 could go to four workers at once rather than waiting for the whole reader.
+
+The board's counts first read `4 ok · 0 retry · 1 fail` for the 28th, a night with four
+retries, because they counted each job by how it ended. A job that retried now counts as a
+retry as well, so the board answers the question this plan opens with.
+
+The preview link lost its marker the same day the review came in. See ADR 0003.
