@@ -4,7 +4,7 @@ import { readNight } from './digest/read-night.js';
 import type { Night } from './digest/types.js';
 import { lastBeat, type Beat } from './heartbeat.js';
 
-// A night's rows, tallied by how each job last ended. Null means the night couldn't be read
+// A night's rows, tallied by what happened to each job. Null means the night couldn't be read
 // (no file, or it vanished between listing the directory and reading it) — the board renders
 // that as "—", never as zeros, so a missing night is never mistaken for a quiet one.
 export type NightCounts = { ok: number; retry: number; fail: number };
@@ -34,12 +34,17 @@ export function nightsOnDisk(runsDir: string): string[] {
   }
 }
 
-// One job's count is by how it last stood that night (styleguide: pure logic lives here, not
-// in the view). Retries along the way don't change the tally — only the night's ending does.
-export function countByLastStatus(rows: Night['rows']): NightCounts {
+// What happened to each job that night (styleguide: pure logic lives here, not in the view).
+// A job counts as `retry` if it retried at all, even when it went on to succeed, because the
+// digest exists to say what ran, what retried and what failed. So the three do not add up to
+// the number of jobs: a job that retried and then succeeded is counted under ok and retry both.
+// Counting only how each job ended would report a night with four retries as "0 retry".
+export function countNight(rows: Night['rows']): NightCounts {
   const counts: NightCounts = { ok: 0, retry: 0, fail: 0 };
   for (const row of rows) {
-    counts[row.lastStatus] += 1;
+    if (row.lastStatus === 'ok') counts.ok += 1;
+    if (row.lastStatus === 'fail') counts.fail += 1;
+    if (row.retries > 0) counts.retry += 1;
   }
   return counts;
 }
@@ -48,7 +53,7 @@ export function countByLastStatus(rows: Night['rows']): NightCounts {
 export function nightSummaries(runsDir: string, nights: string[]): NightSummary[] {
   return nights.map((night) => {
     const data = readNight(runsDir, night);
-    return { night, counts: data ? countByLastStatus(data.rows) : null };
+    return { night, counts: data ? countNight(data.rows) : null };
   });
 }
 
