@@ -1,4 +1,15 @@
-import type { Status } from '../status.js';
+import type { NightCounts, Status } from '../status.js';
+
+// A night's counts as "ok · retry · fail", or "—" when the night couldn't be read. Missing
+// data renders as "—", never blank (styleguide).
+function Counts({ counts }: { counts: NightCounts | null }) {
+  if (counts === null) return <>—</>;
+  return (
+    <>
+      {counts.ok} ok · {counts.retry} retry · {counts.fail} fail
+    </>
+  );
+}
 
 export function StatusBoard({ status }: { status: Status }) {
   return (
@@ -20,7 +31,9 @@ export function StatusBoard({ status }: { status: Status }) {
       ) : (
         <ul>
           {status.nights.map((n) => (
-            <li>{n}</li>
+            <li>
+              <a href={`/digest/${n.night}`}>{n.night}</a> · <Counts counts={n.counts} />
+            </li>
           ))}
         </ul>
       )}
