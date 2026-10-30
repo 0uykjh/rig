@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { loadConfig, type RigConfig } from './config.js';
+import { readNight } from './digest/read-night.js';
 import { lane } from './lane.js';
 import { readStatus } from './status.js';
+import { Digest } from './views/digest.js';
 import { Layout } from './views/layout.js';
 import { StatusBoard } from './views/status.js';
 
@@ -17,6 +19,18 @@ export function createApp(config: RigConfig = loadConfig()) {
       </Layout>,
     ),
   );
+
+  // Issue #3: GET /digest/:night — one table, sorted by job, "nothing ran" when empty, 404 when
+  // the night has no file at all.
+  app.get('/digest/:night', (c) => {
+    const night = readNight(config.runsDir, c.req.param('night'));
+    if (night === null) return c.notFound();
+    return c.html(
+      <Layout title={`digest · ${night.night}`} lane={lane()}>
+        <Digest night={night} />
+      </Layout>,
+    );
+  });
 
   return app;
 }
